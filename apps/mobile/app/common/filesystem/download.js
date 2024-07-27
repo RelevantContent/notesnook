@@ -25,6 +25,7 @@ import { useAttachmentStore } from "../../stores/use-attachment-store";
 import { DatabaseLogger, db } from "../database";
 import { cacheDir, fileCheck } from "./utils";
 import { createCacheDir, exists } from "./io";
+import { strings } from "@notesnook/intl";
 
 export async function downloadFile(filename, data, cancelToken) {
   if (!data) {
@@ -91,18 +92,15 @@ export async function downloadFile(filename, data, cancelToken) {
     return status >= 200 && status < 300;
   } catch (e) {
     if (e.message !== "canceled") {
-      ToastManager.show({
-        heading: "Error downloading file",
+      const toast = {
+        heading: strings.downloadError(),
         message: e.message,
         type: "error",
         context: "global"
-      });
-      ToastManager.show({
-        heading: "Error downloading file",
-        message: e.message,
-        type: "error",
-        context: "local"
-      });
+      };
+      ToastManager.show(toast);
+      toast.context = "local";
+      ToastManager.show(toast);
     }
 
     useAttachmentStore.getState().remove(filename);

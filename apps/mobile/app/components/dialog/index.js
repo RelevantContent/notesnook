@@ -37,6 +37,7 @@ import DialogHeader from "./dialog-header";
 import { useCallback } from "react";
 import { Button } from "../ui/button";
 import { getContainerBorder } from "../../utils/colors";
+import { strings } from "@notesnook/intl";
 
 export const Dialog = ({ context = "global" }) => {
   const { colors } = useThemeColors();
@@ -49,8 +50,8 @@ export const Dialog = ({ context = "global" }) => {
   const [dialogInfo, setDialogInfo] = useState({
     title: "",
     paragraph: "",
-    positiveText: "Done",
-    negativeText: "Cancel",
+    positiveText: strings.done(),
+    negativeText: strings.cancel(),
     positivePress: () => {},
     onClose: () => {},
     positiveType: "transparent",

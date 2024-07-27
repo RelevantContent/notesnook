@@ -49,6 +49,7 @@ import Seperator from "../../ui/seperator";
 import SheetWrapper from "../../ui/sheet";
 import Paragraph from "../../ui/typography/paragraph";
 import { useUserStore } from "../../../stores/use-user-store";
+import { strings } from "@notesnook/intl";
 
 const RestoreDataSheet = () => {
   const [visible, setVisible] = useState(false);
@@ -446,7 +447,7 @@ const RestoreDataComponent = ({ close, setRestoring, restoring }) => {
         </Paragraph>
       </View>
       <Button
-        title="Restore"
+        title={strings.restore()}
         height={30}
         type="accent"
         style={{
@@ -473,15 +474,7 @@ const RestoreDataComponent = ({ close, setRestoring, restoring }) => {
             paddingTop: restoring ? 8 : 0
           }}
         >
-          <DialogHeader
-            title="Backups"
-            paragraph={`All the backups are stored in ${
-              Platform.OS === "ios"
-                ? "File Manager/Notesnook/Backups"
-                : "selected backups folder."
-            }`}
-            button={button}
-          />
+          <DialogHeader title={strings.backups()} button={button} />
         </View>
         <Seperator half />
         <FlatList
@@ -511,7 +504,7 @@ const RestoreDataComponent = ({ close, setRestoring, restoring }) => {
                   {Platform.OS === "android" && !backupDirectoryAndroid ? (
                     <>
                       <Button
-                        title="Select backups folder"
+                        title={strings.selectBackupsFolder()}
                         icon="folder"
                         onPress={async () => {
                           let folder = await ScopedStorage.openDocumentTree(
@@ -550,13 +543,12 @@ const RestoreDataComponent = ({ close, setRestoring, restoring }) => {
                         textBreakStrategy="balanced"
                         color={colors.secondary.paragraph}
                       >
-                        Select the folder that includes your backup files to
-                        list them here.
+                        {strings.noBackupsFound()}
                       </Paragraph>
                     </>
                   ) : (
                     <Paragraph color={colors.secondary.paragraph}>
-                      No backups found
+                      {strings.noBackupsFound()}
                     </Paragraph>
                   )}
                 </View>
@@ -571,9 +563,9 @@ const RestoreDataComponent = ({ close, setRestoring, restoring }) => {
               >
                 <ActivityIndicator color={colors.primary.accent} />
                 <Paragraph color={colors.secondary.paragraph}>
-                  Restoring {progress ? progress?.collection : null}
+                  {strings.restoring()} {progress ? progress?.collection : null}
                   {progress ? `(${progress.current}/${progress.total}) ` : null}
-                  ...Please wait.
+                  ...${strings.pleaseWait()}.
                 </Paragraph>
               </View>
             )

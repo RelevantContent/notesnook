@@ -43,6 +43,7 @@ import Heading from "../ui/typography/heading";
 import Paragraph from "../ui/typography/paragraph";
 import { AttachmentItem } from "./attachment-item";
 import DownloadAttachments from "./download-attachments";
+import { strings } from "@notesnook/intl";
 
 const DEFAULT_SORTING: SortOptions = {
   sortBy: "dateEdited",
@@ -134,24 +135,24 @@ export const AttachmentDialog = ({ note }: { note?: Note }) => {
 
   const attachmentTypes = [
     {
-      title: "All",
+      title: strings.mediaTypes.all(),
       filterBy: "all"
     },
     {
-      title: "Images",
+      title: strings.mediaTypes.image(),
       filterBy: "images"
     },
     {
-      title: "Documents",
-      filterBy: "documents"
+      title: strings.mediaTypes.audio(),
+      filterBy: "audio"
     },
     {
-      title: "Video",
+      title: strings.mediaTypes.video(),
       filterBy: "video"
     },
     {
-      title: "Audio",
-      filterBy: "audio"
+      title: strings.mediaTypes.document(),
+      filterBy: "documents"
     }
   ];
 
@@ -208,7 +209,7 @@ export const AttachmentDialog = ({ note }: { note?: Note }) => {
           alignItems: "center"
         }}
       >
-        <Heading>Attachments</Heading>
+        <Heading>{strings.dataTypesPluralCamelCase.attachment()}</Heading>
 
         <View
           style={{
@@ -317,9 +318,7 @@ export const AttachmentDialog = ({ note }: { note?: Note }) => {
             }}
           >
             <Icon name="attachment" size={60} color={colors.secondary.icon} />
-            <Paragraph>
-              {note ? "No attachments on this note" : "No attachments"}
-            </Paragraph>
+            <Paragraph>{strings.noAttachments()}</Paragraph>
           </View>
         }
         ListFooterComponent={
@@ -347,7 +346,8 @@ export const AttachmentDialog = ({ note }: { note?: Note }) => {
           size={SIZE.xs}
           color={colors.primary.icon}
         />
-        {"  "}All attachments are end-to-end encrypted.
+        {"  "}
+        {strings.attachmentsEncryptedNote()}
       </Paragraph>
     </View>
   );

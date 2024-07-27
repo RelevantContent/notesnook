@@ -39,6 +39,7 @@ import { settingsGroups } from "./settings-data";
 import { RouteParams, SettingSection } from "./types";
 import SettingsUserSection from "./user-section";
 import { Header } from "../../components/header";
+import { strings } from "@notesnook/intl";
 const keyExtractor = (item: SettingSection) => item.id;
 
 const Home = ({
@@ -103,10 +104,10 @@ const Home = ({
                 }}
               >
                 <Heading color={colors.primary.paragraph} size={SIZE.lg}>
-                  Logging out
+                  {strings.loggingOut()}
                 </Heading>
                 <Paragraph color={colors.secondary.paragraph}>
-                  Please wait while we log out and clear app data.
+                  {strings.loggingOutDesc()}
                 </Paragraph>
                 <View
                   style={{

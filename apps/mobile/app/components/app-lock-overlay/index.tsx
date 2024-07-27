@@ -46,6 +46,7 @@ import Input from "../ui/input";
 import Seperator from "../ui/seperator";
 import Heading from "../ui/typography/heading";
 import Paragraph from "../ui/typography/paragraph";
+import { strings } from "@notesnook/intl";
 
 const getUser = () => {
   const user = MMKV.getString("user");
@@ -149,7 +150,7 @@ const AppLockedOverlay = () => {
         password.current = undefined;
       } else {
         ToastManager.show({
-          heading: `Invalid ${keyboardType === "numeric" ? "pin" : "password"}`,
+          heading: strings.invalid(keyboardType),
           type: "error",
           context: "local"
         });
@@ -237,7 +238,7 @@ const AppLockedOverlay = () => {
             textAlign: "center"
           }}
         >
-          Unlock your notes
+          {strings.unlockNotes()}
         </Heading>
 
         <Paragraph
@@ -247,7 +248,7 @@ const AppLockedOverlay = () => {
             maxWidth: "90%"
           }}
         >
-          {"Please verify it's you"}
+          {strings.verifyItsYou()}
         </Paragraph>
         <Seperator />
         <View
@@ -288,7 +289,7 @@ const AppLockedOverlay = () => {
             {user || appLockHasPasswordSecurity ? (
               <>
                 <Button
-                  title="Continue"
+                  title={strings.continue()}
                   type="accent"
                   onPress={onSubmit}
                   width={250}
@@ -304,7 +305,7 @@ const AppLockedOverlay = () => {
 
             {biometricsAuthEnabled ? (
               <Button
-                title="Unlock with Biometrics"
+                title={strings.unlockWithBiometrics()}
                 width={250}
                 onPress={onUnlockAppRequested}
                 icon={"fingerprint"}

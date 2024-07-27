@@ -36,6 +36,7 @@ import Storage from "../database/storage";
 import { cacheDir, copyFileAsync, releasePermissions } from "./utils";
 import { createCacheDir, exists } from "./io";
 import { IOS_APPGROUPID } from "../../utils/constants";
+import { strings } from "@notesnook/intl";
 
 export const FileDownloadStatus = {
   Success: 1,
@@ -253,8 +254,8 @@ export default async function downloadAttachment(
 
     if (!options.silent) {
       ToastManager.show({
-        heading: "Download successful",
-        message: filename + " downloaded",
+        heading: strings.network.downloadSuccess(),
+        message: strings.network.fileDownloaded(filename),
         type: "success"
       });
     }
@@ -273,12 +274,8 @@ export default async function downloadAttachment(
     }
     if (!options.silent) {
       presentSheet({
-        title: "File downloaded",
-        paragraph: `${filename} saved to ${
-          Platform.OS === "android"
-            ? "selected path"
-            : "File Manager/Notesnook/downloads"
-        }`,
+        title: strings.network.fileDownloaded(),
+        paragraph: strings.fileSaved(filename, Platform.OS),
         icon: "download",
         context: global ? null : attachment.hash,
         component: <ShareComponent uri={fileUri} name={filename} padding={12} />

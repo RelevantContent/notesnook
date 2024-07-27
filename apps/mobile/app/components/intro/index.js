@@ -40,6 +40,7 @@ import Navigation from "../../services/navigation";
 import { eOpenLoginDialog } from "../../utils/events";
 import { AuthMode } from "../auth";
 import { eSendEvent } from "../../services/event-manager";
+import { strings } from "@notesnook/intl";
 
 const Intro = ({ navigation }) => {
   const { colors } = useThemeColors();
@@ -215,7 +216,7 @@ const Intro = ({ navigation }) => {
           }}
           fontSize={SIZE.md}
           type="accent"
-          title="Get started"
+          title={strings.getStarted()}
         />
 
         <TouchableOpacity
@@ -251,8 +252,10 @@ const Intro = ({ navigation }) => {
             }}
             size={SIZE.xs}
           >
-            Help improve Notesnook by sending completely anonymized{" "}
-            <Heading size={SIZE.xs}>private analytics and bug reports.</Heading>
+            {strings.analyticsPermissionText[0]()}{" "}
+            <Heading size={SIZE.xs}>
+              {strings.analyticsPermissionText[1]()}
+            </Heading>
           </Paragraph>
         </TouchableOpacity>
       </View>

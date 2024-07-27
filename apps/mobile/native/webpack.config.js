@@ -104,6 +104,7 @@ module.exports = (env) => {
         "@mdi/js": path.join(__dirname, "../node_modules/@mdi/js/mdi.js"),
         "katex": path.join(__dirname, "../node_modules/katex"),
         "tinycolor2":  path.join(__dirname, "../node_modules/tinycolor2"),
+        "@lingui/core": path.join(__dirname, "../node_modules/@lingui/core"),
       },
       fallback: {
         "crypto": false,
@@ -176,7 +177,7 @@ module.exports = (env) => {
               plugins: [
                 "react-native-reanimated/plugin",
                 "@babel/plugin-transform-named-capturing-groups-regex",
-                ["@babel/plugin-transform-private-methods", { "loose": true }]
+                ["@babel/plugin-transform-private-methods", { "loose": true }],
               ]
             },
           },
@@ -220,6 +221,8 @@ module.exports = (env) => {
             /node_modules(.*[/\\])+whatwg-url/,
             /node_modules(.*[/\\])+react-native-url-polyfill/,
             /node_modules(.*[/\\])+diffblazer/,
+            /node_modules(.*[/\\])+@messageformat[/\\]parser/,
+            /node_modules(.*[/\\])+@lingui[/\\]core/,
           ],
           use: {
             loader: "babel-loader",
@@ -234,6 +237,7 @@ module.exports = (env) => {
               plugins: [
                 "react-native-reanimated/plugin",
                 "@babel/plugin-transform-named-capturing-groups-regex",
+                "macros"
               ]
             },
           },
@@ -264,11 +268,13 @@ module.exports = (env) => {
                   ? [
                       "module:react-refresh/babel",
                       "react-native-reanimated/plugin",
+                      "macros"
                     ]
                   : [
                       "react-native-reanimated/plugin",
                       `@babel/plugin-transform-named-capturing-groups-regex`,
                       "transform-remove-console",
+                      "macros"
                     ],
             },
           },

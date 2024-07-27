@@ -44,6 +44,7 @@ import { ProgressBarComponent } from "../../ui/svg/lazy";
 import Paragraph from "../../ui/typography/paragraph";
 import { sleep } from "../../../utils/time";
 import { MMKV } from "../../../common/database/mmkv";
+import { strings } from "@notesnook/intl";
 
 const WIN_WIDTH = Dimensions.get("window").width;
 const WIN_HEIGHT = Dimensions.get("window").height;
@@ -135,10 +136,10 @@ const PDFPreview = () => {
       presentDialog({
         context: attachment?.hash,
         input: true,
-        inputPlaceholder: "Enter password",
-        positiveText: "Unlock",
-        title: "Decrypt",
-        paragraph: "Please input password to view pdf.",
+        inputPlaceholder: strings.enterPassword(),
+        positiveText: strings.open(),
+        title: strings.pdfLocked(),
+        paragraph: strings.pdfLockedDesc(),
         positivePress: (value) => {
           setTimeout(() => {
             setPassword(value);
@@ -185,8 +186,7 @@ const PDFPreview = () => {
                 }}
                 color={colors.static.white}
               >
-                Loading {`${progress?.percent ? `(${progress?.percent})` : ""}`}
-                ... Please wait
+                {strings.loadingWithProgress(progress.percent)}
               </Paragraph>
             </Animated.View>
           ) : (

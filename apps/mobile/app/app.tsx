@@ -16,6 +16,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+import { i18n } from "@lingui/core";
+import { I18nProvider } from "@lingui/react";
 import {
   THEME_COMPATIBILITY_VERSION,
   useThemeEngineStore
@@ -73,7 +75,9 @@ const App = () => {
     <View
       style={{
         height: "100%",
-        width: "100%"
+        width: "100%",
+        justifyContent: "center",
+        alignItems: "center"
       }}
     >
       <View
@@ -148,7 +152,11 @@ export const withTheme = (Element: () => JSX.Element) => {
       currTheme = nextTheme;
     }
 
-    return <Element />;
+    return (
+      <I18nProvider i18n={i18n}>
+        <Element />
+      </I18nProvider>
+    );
   };
 };
 

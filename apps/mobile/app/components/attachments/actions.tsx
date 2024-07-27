@@ -57,6 +57,7 @@ import Paragraph from "../ui/typography/paragraph";
 import { useTabStore } from "../../screens/editor/tiptap/use-tab-store";
 import { editorController } from "../../screens/editor/tiptap/utils";
 import SheetProvider from "../sheet-provider";
+import { strings } from "@notesnook/intl";
 
 const Actions = ({
   attachment,
@@ -81,7 +82,7 @@ const Actions = ({
 
   const actions = [
     {
-      name: "Download",
+      name: strings.network.download(),
       onPress: async () => {
         if (currentProgress) {
           await db.fs().cancel(attachment.hash);
@@ -93,11 +94,11 @@ const Actions = ({
       icon: "download"
     },
     {
-      name: "Reupload",
+      name: strings.network.reupload(),
       onPress: async () => {
         if (!PremiumService.get()) {
           ToastManager.show({
-            heading: "Upgrade to pro",
+            heading: strings.upgradeToPro(),
             type: "error",
             context: "local"
           });
@@ -113,17 +114,17 @@ const Actions = ({
       icon: "upload"
     },
     {
-      name: "Run file check",
+      name: strings.fileCheck(),
       onPress: async () => {
         setLoading({
-          name: "Run file check"
+          name: strings.fileCheck()
         });
         const res = await filesystem.checkAttachment(attachment.hash);
         if (res.failed) {
           db.attachments.markAsFailed(attachment.id, res.failed);
           setFailed(res.failed);
           ToastManager.show({
-            heading: "File check failed with error: " + res.failed,
+            heading: strings.fileCheckFailed(res.failed),
             type: "error",
             context: "local"
           });
@@ -132,7 +133,7 @@ const Actions = ({
           db.attachments.markAsFailed(attachment.id);
           eSendEvent(eDBItemUpdate, attachment.id);
           ToastManager.show({
-            heading: "File check passed",
+            heading: strings.fileCheckPassed(),
             type: "success",
             context: "local"
           });
@@ -146,13 +147,12 @@ const Actions = ({
       icon: "file-check"
     },
     {
-      name: "Rename",
+      name: strings.rename(),
       onPress: () => {
         presentDialog({
           context: contextId as any,
           input: true,
-          title: "Rename file",
-          paragraph: "Enter a new name for the file",
+          title: strings.renameFile(),
           defaultValue: attachment.filename,
           positivePress: async (value) => {
             if (value && value.length > 0) {
@@ -171,7 +171,7 @@ const Actions = ({
       icon: "form-textbox"
     },
     {
-      name: "Delete",
+      name: strings.delete(),
       onPress: async () => {
         const relations = await db.relations.to(attachment, "note").get();
         await db.attachments.remove(attachment.hash, false);
@@ -254,8 +254,7 @@ const Actions = ({
 
           {notes.length ? (
             <Paragraph size={SIZE.xs} color={colors.secondary.paragraph}>
-              {notes.length} note
-              {notes.length > 1 ? "s" : ""}
+              {strings.notes(notes.length)}
             </Paragraph>
           ) : null}
           <Paragraph
@@ -263,7 +262,7 @@ const Actions = ({
               Clipboard.setString(attachment.hash);
               ToastManager.show({
                 type: "success",
-                heading: "Attachment hash copied",
+                heading: strings.hashCopied(),
                 context: "local"
               });
             }}
@@ -293,7 +292,7 @@ const Actions = ({
               }}
               size={SIZE.sm}
             >
-              List of notes:
+              {strings.listOf()} {strings.dataTypesPlural.note()}:
             </Heading>
 
             {notes.map((item) => (
@@ -352,7 +351,7 @@ const Actions = ({
         {failed ? (
           <Notice
             type="alert"
-            text={`File check failed: ${failed} Try reuploading the file to fix the issue.`}
+            text={strings.fileCheckFailed(failed)}
             size="small"
           />
         ) : null}
