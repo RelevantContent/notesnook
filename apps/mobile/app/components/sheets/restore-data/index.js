@@ -72,7 +72,6 @@ const RestoreDataSheet = () => {
 
   const close = useCallback(() => {
     if (restoring) {
-      showIsWorking();
       return;
     }
     sheet.current?.hide();
@@ -80,15 +79,6 @@ const RestoreDataSheet = () => {
       setVisible(false);
     }, 150);
   }, [restoring]);
-
-  const showIsWorking = () => {
-    ToastManager.show({
-      heading: "Restoring Backup",
-      message: "Your backup data is being restored. please wait.",
-      type: "error",
-      context: "local"
-    });
-  };
 
   return !visible ? null : (
     <SheetWrapper
@@ -182,11 +172,10 @@ const RestoreDataComponent = ({ close, setRestoring, restoring }) => {
       let resolved = false;
       presentDialog({
         context: "local",
-        title: "Encrypted backup",
+        title: strings.backupEncrypted(),
         input: true,
-        inputPlaceholder: "Password",
-        paragraph: "Please enter password of this backup file",
-        positiveText: "Restore",
+        inputPlaceholder: strings.password(),
+        positiveText: strings.restore(),
         secureTextEntry: true,
         onClose: () => {
           if (resolved) return;
@@ -250,7 +239,7 @@ const RestoreDataComponent = ({ close, setRestoring, restoring }) => {
     await db.initCollections();
     refreshAllStores();
     ToastManager.show({
-      heading: "Backup restored successfully.",
+      heading: strings.backupRestored(),
       type: "success",
       context: "global"
     });
@@ -261,10 +250,8 @@ const RestoreDataComponent = ({ close, setRestoring, restoring }) => {
   const backupError = (e) => {
     console.log(e.stack);
     ToastManager.show({
-      heading: "Restore failed",
-      message:
-        e.message ||
-        "The selected backup data file is invalid. You must select a *.nnbackup file to restore.",
+      heading: strings.restoreFailed(),
+      message: e.message,
       type: "error",
       context: "local"
     });
@@ -328,7 +315,7 @@ const RestoreDataComponent = ({ close, setRestoring, restoring }) => {
       setRestoring(false);
       close();
       ToastManager.show({
-        heading: "Backup restored successfully.",
+        heading: strings.backupRestored(),
         type: "success",
         context: "global"
       });
