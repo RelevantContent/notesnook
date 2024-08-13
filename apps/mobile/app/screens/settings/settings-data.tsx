@@ -71,13 +71,14 @@ import { verifyUser, verifyUserWithApplock } from "./functions";
 import { SettingSection } from "./types";
 import { getTimeLeft } from "./user-section";
 import ScreenGuardModule from "react-native-screenguard";
+import { strings } from "@notesnook/intl";
 
 type User = any;
 
 export const settingsGroups: SettingSection[] = [
   {
     id: "account",
-    name: "account",
+    name: strings.account(),
     useHook: () => useUserStore((state) => state.user),
     hidden: (current) => !current,
     sections: [
@@ -90,10 +91,10 @@ export const settingsGroups: SettingSection[] = [
           const isBasic = user.subscription?.type === SUBSCRIPTION_STATUS.BASIC;
           const isTrial = user.subscription?.type === SUBSCRIPTION_STATUS.TRIAL;
           return isBasic || !user.subscription?.type
-            ? "Subscribe to Pro"
+            ? strings.subscribeToPro()
             : isTrial
-            ? "Your free trial has started"
-            : "Subscription details";
+            ? strings.trialStarted()
+            : strings.subDetails();
         },
         type: "component",
         component: "subscription",
@@ -113,40 +114,39 @@ export const settingsGroups: SettingSection[] = [
           );
 
           return user.subscription?.type === 2
-            ? "You signed up on " + startDate
+            ? strings.signedUpOn(startDate)
             : user.subscription?.type === 1
-            ? "Your free trial will end on " + expiryDate
+            ? strings.trialEndsOn(expiryDate)
             : user.subscription?.type === 6
             ? subscriptionDaysLeft.time < -3
-              ? "Your subscription has ended"
-              : "Your account will be downgraded to Basic in 3 days"
+              ? strings.subEnded()
+              : strings.accountDowngradedIn(3)
             : user.subscription?.type === 7
-            ? `Your subscription will end on ${expiryDate}.`
+            ? strings.subEndsOn(expiryDate)
             : user.subscription?.type === 5
-            ? `Your subscription will renew on ${expiryDate}.`
-            : "Never hesitate to choose privacy";
+            ? strings.subRenewOn(expiryDate)
+            : strings.neverHesitate();
         }
       },
       {
         id: "account-settings",
         type: "screen",
-        name: "Account Settings",
+        name: strings.manageAccount(),
         icon: "account-cog",
-        description: "Manage account",
+        description: strings.manageAccountDesc(),
         sections: [
           {
             id: "remove-profile-picture",
-            name: "Remove profile picture",
-            description: "Remove your picture from profile",
+            name: strings.removeProfilePicture(),
+            description: strings.removeProfilePictureDesc(),
             useHook: () =>
               useUserStore((state) => state.profile?.profilePicture),
             hidden: () => !useUserStore.getState().profile?.profilePicture,
             modifer: () => {
               presentDialog({
-                title: "Remove profile picture",
-                paragraph:
-                  "Are you sure you want to remove your profile picture?",
-                positiveText: "Remove",
+                title: strings.removeProfilePicture(),
+                paragraph: strings.removeProfilePictureConfirmation(),
+                positiveText: strings.remove(),
                 positivePress: async () => {
                   db.settings
                     .setProfile({
@@ -163,15 +163,15 @@ export const settingsGroups: SettingSection[] = [
           },
           {
             id: "remove-name",
-            name: "Remove full name",
-            description: "Remove your name from profile",
+            name: strings.removeFullName(),
+            description: strings.removeFullNameDesc(),
             useHook: () => useUserStore((state) => state.profile?.fullName),
             hidden: () => !useUserStore.getState().profile?.fullName,
             modifer: () => {
               presentDialog({
-                title: "Remove name",
-                paragraph: "Are you sure you want to remove your name?",
-                positiveText: "Remove",
+                title: strings.removeFullName(),
+                paragraph: strings.removeFullNameConfirmation(),
+                positiveText: strings.remove(),
                 positivePress: async () => {
                   db.settings
                     .setProfile({
@@ -188,63 +188,61 @@ export const settingsGroups: SettingSection[] = [
           },
           {
             id: "recovery-key",
-            name: "Save data recovery key",
+            name: strings.saveDataRecoveryKey(),
             modifer: async () => {
               verifyUser(null, async () => {
                 await sleep(300);
                 eSendEvent(eOpenRecoveryKeyDialog);
               });
             },
-            description:
-              "Recover your data using the recovery key if your password is lost."
+            description: strings.saveDataRecoveryKeyDesc()
           },
           {
             id: "manage-attachments",
-            name: "Manage attachments",
+            name: strings.manageAttachments(),
             icon: "attachment",
             modifer: () => {
               AttachmentDialog.present();
             },
-            description: "Manage all attachments in one place."
+            description: strings.manageAttachmentsDesc()
           },
           {
             id: "change-password",
-            name: "Change password",
+            name: strings.changePassword(),
             modifer: async () => {
               ChangePassword.present();
             },
-            description: "Setup a new password for your account."
+            description: strings.changePasswordDesc()
           },
           {
             id: "change-email",
-            name: "Change email",
+            name: strings.changeEmail(),
             modifer: async () => {
               ChangeEmail.present();
             },
-            description: "Setup a new email for your account."
+            description: strings.changeEmailDesc()
           },
           {
             id: "2fa-settings",
             type: "screen",
-            name: "Two factor authentication",
-            description: "Manage 2FA settings",
+            name: strings.twoFactorAuth(),
+            description: strings.twoFactorAuthDesc(),
             icon: "two-factor-authentication",
             sections: [
               {
                 id: "enable-2fa",
-                name: "Change primary two-factor authentication",
+                name: strings.change2faMethod(),
                 modifer: () => {
                   verifyUser("global", async () => {
                     MFASheet.present();
                   });
                 },
                 useHook: () => useUserStore((state) => state.user),
-                description:
-                  "Change your current two-factor authentication method"
+                description: strings.change2faMethodDesc()
               },
               {
                 id: "2fa-fallback",
-                name: "Add fallback 2FA method",
+                name: strings.addFallback2faMethod(),
                 useHook: () => useUserStore((state) => state.user),
                 hidden: (user) => {
                   return (
@@ -257,12 +255,11 @@ export const settingsGroups: SettingSection[] = [
                     MFASheet.present(true);
                   });
                 },
-                description:
-                  "You can use fallback 2FA method incase you are unable to login via primary method"
+                description: strings.addFallback2faMethodDesc()
               },
               {
                 id: "change-2fa-method",
-                name: "Reconfigure fallback 2FA method",
+                name: strings.change2faFallbackMethod(),
                 useHook: () => useUserStore((state) => state.user),
                 hidden: (user) => {
                   return (
@@ -275,12 +272,11 @@ export const settingsGroups: SettingSection[] = [
                     MFASheet.present(true);
                   });
                 },
-                description:
-                  "You can use fallback 2FA method incase you are unable to login via primary method"
+                description: strings.change2faFallbackMethod()
               },
               {
                 id: "view-2fa-codes",
-                name: "View recovery codes",
+                name: strings.viewRecoveryCodes(),
                 modifer: () => {
                   verifyUser("global", async () => {
                     MFARecoveryCodes.present("sms");
@@ -290,20 +286,19 @@ export const settingsGroups: SettingSection[] = [
                 hidden: (user) => {
                   return !(user as User)?.mfa?.isEnabled;
                 },
-                description:
-                  "View and save recovery codes for to recover your account"
+                description: strings.viewRecoveryCodesDesc()
               }
             ]
           },
           {
             id: "subscription-not-active",
-            name: "Subscription not activated?",
+            name: strings.subscriptionNotActivated(),
             hidden: () => Platform.OS !== "ios",
             modifer: async () => {
               if (Platform.OS === "android") return;
               presentSheet({
-                title: "Loading subscriptions",
-                paragraph: "Please wait while we fetch your subscriptions."
+                title: strings.loadingSubscription(),
+                paragraph: strings.loadingSubscriptionDesc()
               });
               const subscriptions = await RNIap.getPurchaseHistory();
               subscriptions.sort(
@@ -311,14 +306,14 @@ export const settingsGroups: SettingSection[] = [
               );
               const currentSubscription = subscriptions[0];
               presentSheet({
-                title: "Notesnook Pro",
-                paragraph: `You subscribed to Notesnook Pro on ${new Date(
-                  currentSubscription.transactionDate
-                ).toLocaleString()}. Verify this subscription?`,
+                title: strings.notesnookPro(),
+                paragraph: strings.subscribedOnVerify(
+                  new Date(currentSubscription.transactionDate).toLocaleString()
+                ),
                 action: async () => {
                   presentSheet({
-                    title: "Verifying subscription",
-                    paragraph: "Please wait while we verify your subscription."
+                    title: strings.verifySubscription(),
+                    paragraph: strings.subscriptionVerifyWait()
                   });
                   await PremiumService.subscriptions.verify(
                     currentSubscription
@@ -326,23 +321,21 @@ export const settingsGroups: SettingSection[] = [
                   eSendEvent(eCloseSheet);
                 },
                 icon: "information-outline",
-                actionText: "Verify"
+                actionText: strings.verify()
               });
             },
-            description: "Verify your subscription to Notesnook Pro"
+            description: strings.verifySubDesc()
           },
           {
             id: "logout",
-            name: "Log out",
-            description:
-              "Logging out will clear all data stored on THIS DEVICE.",
+            name: strings.logout(),
+            description: strings.logoutWarnin(),
             icon: "logout",
             modifer: () => {
               presentDialog({
-                title: "Logout",
-                paragraph:
-                  "Logging out will clear all data stored on THIS DEVICE. Make sure you have synced all your changes before logging out.",
-                positiveText: "Logout",
+                title: strings.logout(),
+                paragraph: strings.logoutWarnin(),
+                positiveText: strings.logout(),
                 positivePress: async () => {
                   try {
                     eSendEvent(eCloseSimpleDialog);
@@ -367,7 +360,7 @@ export const settingsGroups: SettingSection[] = [
                       }, 3000);
                     }, 300);
                   } catch (e) {
-                    ToastManager.error(e as Error, "Error logging out");
+                    ToastManager.error(e as Error, strings.logoutError());
                     eSendEvent("settings-loading", false);
                   }
                 }
@@ -377,20 +370,18 @@ export const settingsGroups: SettingSection[] = [
           {
             id: "delete-account",
             type: "danger",
-            name: "Delete account",
+            name: strings.deleteAccount(),
             icon: "alert",
-            description:
-              "All your data will be removed permanently. Make sure you have saved backup of your notes. This action is IRREVERSIBLE.",
+            description: strings.deleteAccountDesc(),
             modifer: () => {
               presentDialog({
-                title: "Delete account",
+                title: strings.deleteAccount(),
                 paragraphColor: "red",
-                paragraph:
-                  "All your data will be removed permanently. Make sure you have saved backup of your notes. This action is IRREVERSIBLE.",
+                paragraph: strings.deleteAccountDesc(),
                 positiveType: "errorShade",
                 input: true,
-                inputPlaceholder: "Enter account password",
-                positiveText: "Delete",
+                inputPlaceholder: strings.enterAccountPassword(),
+                positiveText: strings.delete(),
                 positivePress: async (value) => {
                   try {
                     const verified = await db.user?.verifyPassword(value);
@@ -403,9 +394,7 @@ export const settingsGroups: SettingSection[] = [
                       });
                     } else {
                       ToastManager.show({
-                        heading: "Incorrect password",
-                        message:
-                          "The account password you entered is incorrect",
+                        heading: strings.passwordIncorrect(),
                         type: "error",
                         context: "global"
                       });
@@ -417,7 +406,7 @@ export const settingsGroups: SettingSection[] = [
                     console.log(e);
                     ToastManager.error(
                       e as Error,
-                      "Failed to delete account",
+                      strings.failedToDeleteAccount(),
                       "global"
                     );
                   }
@@ -429,39 +418,36 @@ export const settingsGroups: SettingSection[] = [
       },
       {
         id: "sync-settings",
-        name: "Sync settings",
-        description: "Configure syncing for this device",
+        name: strings.syncSettings(),
+        description: strings.syncSettingsDesc(),
         type: "screen",
         icon: "autorenew",
         sections: [
           {
             id: "auto-sync",
-            name: "Disable auto sync",
-            description:
-              "Turn off automatic syncing. Changes from this client will be synced only when you run sync manually.",
+            name: strings.disableAutoSync(),
+            description: strings.disableAutoSyncDesc(),
             type: "switch",
             property: "disableAutoSync"
           },
           {
             id: "disable-realtime-sync",
-            name: "Disable realtime sync",
-            description: "Turn off realtime sync in the editor.",
+            name: strings.disableRealtimeSync(),
+            description: strings.disableRealtimeSyncDesc(),
             type: "switch",
             property: "disableRealtimeSync"
           },
           {
             id: "disable-sync",
-            name: "Disable syncing",
-            description:
-              "Turns off syncing completely on this device. Any changes made will remain local only and new changes from your other devices won't sync to this device.",
+            name: strings.disableSync(),
+            description: strings.disableSyncDesc(),
             type: "switch",
             property: "disableSync"
           },
           {
             id: "background-sync",
-            name: "Background sync (experimental)",
-            description:
-              "Periodically wake up the app in background to run sync.",
+            name: strings.backgroundSync(),
+            description: strings.backgroundSyncDesc(),
             type: "switch",
             property: "backgroundSync",
             onChange: (value) => {
@@ -474,15 +460,14 @@ export const settingsGroups: SettingSection[] = [
           },
           {
             id: "pull-sync",
-            name: "Force pull changes",
-            description: `Use this if some changes are not appearing on this device from other devices. This will pull everything from the server and overwrite with whatever is one this device.\n\nThese must only be used for troubleshooting. Using them regularly for sync is not recommended and will lead to unexpected data loss and other issues. If you are having persistent issues with sync, please report them to us at support@streetwriters.co.`,
+            name: strings.forcePullChanges(),
+            description: strings.forcePullChangesDesc(),
             modifer: () => {
               presentDialog({
-                title: "Force Pull changes",
-                paragraph:
-                  "This must only be used for troubleshooting. Using this regularly for sync is not recommended and will lead to unexpected data loss and other issues. If you are having persistent issues with sync, please report them to us at support@streetwriters.co.",
-                negativeText: "Cancel",
-                positiveText: "Start",
+                title: strings.forcePullChanges(),
+                paragraph: strings.forceSyncNotice(),
+                negativeText: strings.cancel(),
+                positiveText: strings.start(),
                 positivePress: async () => {
                   eSendEvent(eCloseSheet);
                   await sleep(300);
@@ -496,15 +481,14 @@ export const settingsGroups: SettingSection[] = [
           },
           {
             id: "push-sync",
-            name: "Force push changes",
-            description: `Use this if some changes are not appearing on this device from other devices. This will pull everything from the server and overwrite with whatever is one this device.`,
+            name: strings.forcePushChanges(),
+            description: strings.forcePushChangesDesc(),
             modifer: () => {
               presentDialog({
-                title: "Force Push changes",
-                paragraph:
-                  "This must only be used for troubleshooting. Using this regularly for sync is not recommended and will lead to unexpected data loss and other issues. If you are having persistent issues with sync, please report them to us at support@streetwriters.co.",
-                negativeText: "Cancel",
-                positiveText: "Start",
+                title: strings.forcePushChanges(),
+                paragraph: strings.forceSyncNotice(),
+                negativeText: strings.cancel(),
+                positiveText: strings.start(),
                 positivePress: async () => {
                   eSendEvent(eCloseSheet);
                   await sleep(300);
@@ -522,28 +506,27 @@ export const settingsGroups: SettingSection[] = [
   },
   {
     id: "customize",
-    name: "Customization",
+    name: strings.customization(),
     sections: [
       {
         id: "personalization",
         type: "screen",
-        name: "Appearance",
-        description: "Change app look and feel with color themes",
+        name: strings.appearance(),
+        description: strings.appearanceDesc(),
         icon: "shape",
         sections: [
           {
             id: "theme-picker",
             type: "screen",
-            name: "Themes",
-            description: "Customize Notesnook to absolute infinity.",
+            name: strings.themes(),
+            description: strings.themesDesc(),
             component: "theme-selector"
           },
           {
             id: "use-system-theme",
             type: "switch",
-            name: "Use system theme",
-            description:
-              "Automatically switch to dark mode when system theme changes",
+            name: strings.useSystemTheme(),
+            description: strings.useSystemThemeDesc(),
             property: "useSystemTheme",
             icon: "circle-half",
             modifer: () => {
@@ -561,8 +544,8 @@ export const settingsGroups: SettingSection[] = [
           {
             id: "enable-dark-mode",
             type: "switch",
-            name: "Dark mode",
-            description: "Strain your eyes no more at night",
+            name: strings.darkMode(),
+            description: strings.darkModeDesc(),
             property: "colorScheme",
             icon: "brightness-6",
             modifer: () => {
@@ -575,42 +558,41 @@ export const settingsGroups: SettingSection[] = [
       {
         id: "behaviour",
         type: "screen",
-        name: "Behaviour",
-        description: "Change how the app behaves in different situations",
+        name: strings.behavior(),
+        description: strings.behaviorDesc(),
         sections: [
           {
             id: "default-home",
             type: "component",
-            name: "Homepage",
-            description: "Default screen to open on app startup",
+            name: strings.homepage(),
+            description: strings.homepageDesc(),
             component: "homeselector"
           },
           {
             id: "date-format",
-            name: "Date format",
-            description: "Set the format for date used across the app",
+            name: strings.dateFormat(),
+            description: strings.dateFormatDesc(),
             type: "component",
             component: "date-format-selector"
           },
           {
             id: "time-format",
-            name: "Time format",
-            description: "Set the format for time used across the app",
+            name: strings.timeFormat(),
+            description: strings.timeFormatDesc(),
             type: "component",
             component: "time-format-selector"
           },
           {
             id: "clear-trash-interval",
             type: "component",
-            name: "Clear trash interval",
-            description:
-              "Select the duration after which trash items will be cleared",
+            name: strings.clearTrashInterval(),
+            description: strings.clearTrashIntervalDesc(),
             component: "trash-interval-selector"
           },
           {
             id: "default-notebook",
-            name: "Clear default notebook",
-            description: "Clear the default notebook for new notes",
+            name: strings.clearDefaultNotebook(),
+            description: strings.clearDefaultNotebookDesc(),
             modifer: () => {
               db.settings.setDefaultNotebook(undefined);
             },
@@ -620,45 +602,44 @@ export const settingsGroups: SettingSection[] = [
       },
       {
         id: "editor",
-        name: "Editor",
+        name: strings.editor(),
         type: "screen",
         icon: "note-edit-outline",
-        description: "Customize the editor to fit your needs",
+        description: strings.editorDesc(),
         sections: [
           {
             id: "configure-toolbar",
             type: "screen",
-            name: "Configure toolbar",
-            description: "Make the toolbar adaptable to your needs.",
+            name: strings.customizeToolbar(),
+            description: strings.customizeToolbarDesc(),
             component: "configuretoolbar"
           },
           {
             id: "reset-toolbar",
-            name: "Reset toolbar",
-            description: "Reset toolbar configuration to default",
+            name: strings.resetToolbar(),
+            description: strings.resetToolbarDesc(),
             modifer: () => {
               useDragState.getState().setPreset("default");
             }
           },
           {
             id: "double-spaced-lines",
-            name: "Use double spaced lines",
-            description:
-              "New lines will be double spaced (old ones won't be affected).",
+            name: strings.doubleSpacedLines(),
+            description: strings.doubleSpacedLinesDesc(),
             type: "switch",
             property: "doubleSpacedLines",
             icon: "format-line-spacing",
             onChange: () => {
               ToastManager.show({
-                heading: "Line spacing changed",
+                heading: strings.lineSpacingChanged(),
                 type: "success"
               });
             }
           },
           {
             id: "default-font-size",
-            name: "Default font size",
-            description: "Set the default font size in editor",
+            name: strings.defaultFontSize(),
+            description: strings.defaultFontSizeDesc(),
             type: "input-selector",
             minInputValue: 8,
             maxInputValue: 120,
@@ -667,8 +648,8 @@ export const settingsGroups: SettingSection[] = [
           },
           {
             id: "default-font-family",
-            name: "Default font family",
-            description: "Set the default font family in editor",
+            name: strings.defaultFontFamily(),
+            description: strings.defaultFontFamilyDesc(),
             type: "component",
             icon: "format-font",
             property: "defaultFontFamily",
@@ -676,16 +657,16 @@ export const settingsGroups: SettingSection[] = [
           },
           {
             id: "title-format",
-            name: "Title format",
+            name: strings.titleFormat(),
             component: "title-format",
-            description: "Customize the formatting for new note title",
+            description: strings.titleFormatDesc(),
             type: "component"
           },
           {
             id: "toggle-markdown",
-            name: "Markdown shortcuts",
+            name: strings.mardownShortcuts(),
             property: "markdownShortcuts",
-            description: "Toggle markdown in the editor",
+            description: strings.mardownShortcutsDesc(),
             type: "switch"
           }
         ]
@@ -699,18 +680,16 @@ export const settingsGroups: SettingSection[] = [
       {
         id: "temeltery",
         type: "switch",
-        name: "Telemetry",
+        name: strings.telemetry(),
         icon: "radar",
-        description:
-          "Contribute towards a better Notesnook. All tracking information is anonymous.",
+        description: strings.telemetryDesc(),
         property: "telemetry"
       },
       {
         id: "marketing-emails",
         type: "switch",
-        name: "Marketing emails",
-        description:
-          "We will send you occasional promotional offers & product updates on your email (sent once every month).",
+        name: strings.marketingEmails(),
+        description: strings.marketingEmailsDesc(),
         modifer: async () => {
           try {
             await db.user?.changeMarketingConsent(
@@ -728,8 +707,8 @@ export const settingsGroups: SettingSection[] = [
       {
         id: "cors-bypass",
         type: "input",
-        name: "CORS bypass proxy",
-        description: "You can set a custom proxy URL to increase your privacy.",
+        name: strings.corsBypass(),
+        description: strings.corsBypassDesc(),
         inputProperties: {
           defaultValue: "https://cors.notesnook.com",
           autoCorrect: false,
@@ -742,14 +721,14 @@ export const settingsGroups: SettingSection[] = [
       {
         id: "vault",
         type: "screen",
-        name: "Vault",
-        description: "Multi-layer encryption to most important notes",
+        name: strings.vault(),
+        description: strings.vaultDesc(),
         icon: "key",
         sections: [
           {
             id: "create-vault",
-            name: "Create vault",
-            description: "Set a password to create vault and lock notes.",
+            name: strings.createVault(),
+            description: strings.createVaultDesc(),
             icon: "key",
             useHook: useVaultStatus,
             hidden: (current) => (current as VaultStatusType)?.exists,
@@ -758,8 +737,7 @@ export const settingsGroups: SettingSection[] = [
                 openVault({
                   item: {},
                   novault: false,
-                  title: "Create vault",
-                  description: "Set a password to create vault and lock notes."
+                  title: strings.createVault()
                 });
               });
             }
@@ -767,39 +745,36 @@ export const settingsGroups: SettingSection[] = [
           {
             id: "change-vault-password",
             useHook: useVaultStatus,
-            name: "Change vault password",
-            description: "Setup a new password for your vault.",
+            name: strings.changeVaultPassword(),
+            description: strings.changeVaultPasswordDesc(),
             hidden: (current) => !(current as VaultStatusType)?.exists,
             modifer: () =>
               openVault({
                 item: {},
                 changePassword: true,
                 novault: true,
-                title: "Change vault password",
-                description: "Set a new password for your vault."
+                title: strings.changeVaultPassword()
               })
           },
           {
             id: "clear-vault",
             useHook: useVaultStatus,
-            name: "Clear vault",
-            description: "Unlock all locked notes",
+            description: strings.clearVaultDesc(),
+            name: strings.clearVault(),
             hidden: (current) => !(current as VaultStatusType)?.exists,
             modifer: () => {
               openVault({
                 item: {},
                 clearVault: true,
                 novault: true,
-                title: "Clear vault",
-                description:
-                  "Enter vault password to unlock and remove all notes from the vault."
+                title: strings.clearVault()
               });
             }
           },
           {
             id: "delete-vault",
-            name: "Delete vault",
-            description: "Delete vault (and optionally remove all notes).",
+            name: strings.deleteVault(),
+            description: strings.deleteVaultDesc(),
             useHook: useVaultStatus,
             hidden: (current) => !(current as VaultStatusType)?.exists,
             modifer: () => {
@@ -807,18 +782,17 @@ export const settingsGroups: SettingSection[] = [
                 item: {},
                 deleteVault: true,
                 novault: true,
-                title: "Delete vault",
-                description: "Enter your account password to delete your vault."
+                title: strings.deleteVault()
               });
             }
           },
           {
             id: "biometric-unlock",
             type: "switch",
-            name: "Biometric unlocking",
+            name: strings.biometricUnlock(),
             icon: "fingerprint",
             useHook: useVaultStatus,
-            description: "Access notes in vault using biometrics",
+            description: strings.biometricUnlockDesc(),
             hidden: (current) => {
               const _current = current as VaultStatusType;
               return !_current?.exists || !_current?.isBiometryAvailable;
@@ -832,11 +806,8 @@ export const settingsGroups: SettingSection[] = [
                 revokeFingerprintAccess: _current.biometryEnrolled,
                 novault: true,
                 title: _current.biometryEnrolled
-                  ? "Revoke biometric unlocking"
-                  : "Enable biometery unlock",
-                description: _current.biometryEnrolled
-                  ? "Disable biometric unlocking for notes in vault"
-                  : "Enable biometric unlocking for notes in vault"
+                  ? strings.revokeBiometricUnlock()
+                  : strings.vaultEnableBiometrics()
               });
             }
           }
@@ -846,9 +817,8 @@ export const settingsGroups: SettingSection[] = [
         id: "privacy-mode",
         type: "switch",
         icon: "eye-off-outline",
-        name: "Privacy mode",
-        description:
-          "Hide app contents when you switch to other apps. This will also disable screenshot taking in the app.",
+        name: strings.privacyMode(),
+        description: strings.privacyModeDesc(),
         modifer: () => {
           const settings = SettingsService.get();
           if (Platform.OS === "ios") {
@@ -870,15 +840,15 @@ export const settingsGroups: SettingSection[] = [
       },
       {
         id: "app-lock",
-        name: "App lock",
+        name: strings.appLock(),
         type: "screen",
-        description: "Enhanced at rest encryption with app lock",
+        description: strings.appLockDesc(),
         icon: "lock",
         sections: [
           {
             id: "app-lock-mode",
-            name: "App lock",
-            description: "Keep intruders away with app lock security.",
+            name: strings.enableAppLock(),
+            description: strings.appLockDesc(),
             icon: "lock",
             type: "switch",
             property: "appLockEnabled",
@@ -905,10 +875,9 @@ export const settingsGroups: SettingSection[] = [
                   !SettingsService.getProperty("appLockHasPasswordSecurity")
                 ) {
                   ToastManager.show({
-                    heading: "Biometrics not enrolled",
+                    heading: strings.biometricsNotEnrolled(),
                     type: "error",
-                    message:
-                      "To use app lock, you must enable biometrics such as Fingerprint lock or Face ID on your phone."
+                    message: strings.biometricsNotEnrolledDesc()
                   });
                   return false;
                 }
@@ -919,26 +888,22 @@ export const settingsGroups: SettingSection[] = [
           },
           {
             id: "app-lock-timer",
-            name: "App lock timeout",
-            description:
-              "Set the time after which the app should lock when in background",
+            name: strings.appLockTimeout(),
+            description: strings.appLockTimeoutDesc(),
             type: "component",
             component: "applock-timer"
           },
           {
             id: "app-lock-pin",
             name: () =>
-              `Setup app lock ${
-                SettingsService.getProperty("applockKeyboardType") === "numeric"
-                  ? "pin"
-                  : "password"
-              }`,
+              SettingsService.getProperty("applockKeyboardType") === "numeric"
+                ? strings.setupAppLockPin()
+                : strings.setupAppLockPassword(),
+
             description: () =>
-              `Set up a ${
-                SettingsService.getProperty("applockKeyboardType") === "numeric"
-                  ? "pin"
-                  : "password"
-              } for app lock`,
+              SettingsService.getProperty("applockKeyboardType") === "numeric"
+                ? strings.setupAppLockPinDesc()
+                : strings.setupAppLockPasswordDesc(),
             hidden: () => {
               return !!SettingsService.getProperty(
                 "appLockHasPasswordSecurity"
@@ -949,24 +914,19 @@ export const settingsGroups: SettingSection[] = [
             },
             property: "appLockHasPasswordSecurity",
             modifer: () => {
-              console.log("called modifier..");
               AppLockPassword.present("create");
             }
           },
           {
             id: "app-lock-pin-change",
             name: () =>
-              `Change app lock ${
-                SettingsService.getProperty("applockKeyboardType") === "numeric"
-                  ? "pin"
-                  : "password"
-              }`,
+              SettingsService.getProperty("applockKeyboardType") === "numeric"
+                ? strings.changeAppLockPin()
+                : strings.changeAppLockPassword(),
             description: () =>
-              `Set up a ${
-                SettingsService.getProperty("applockKeyboardType") === "numeric"
-                  ? "pin"
-                  : "password"
-              } for app lock`,
+              SettingsService.getProperty("applockKeyboardType") === "numeric"
+                ? strings.changeAppLockPinDesc()
+                : strings.changeAppLockPasswordDesc(),
             hidden: () => {
               return !SettingsService.getProperty("appLockHasPasswordSecurity");
             },
@@ -978,17 +938,13 @@ export const settingsGroups: SettingSection[] = [
           {
             id: "app-lock-pin-remove",
             name: () =>
-              `Remove app lock ${
-                SettingsService.getProperty("applockKeyboardType") === "numeric"
-                  ? "pin"
-                  : "password"
-              }`,
+              SettingsService.getProperty("applockKeyboardType") === "numeric"
+                ? strings.removeAppLockPin()
+                : strings.removeAppLockPassword(),
             description: () =>
-              `Remove app lock ${
-                SettingsService.getProperty("applockKeyboardType") === "numeric"
-                  ? "pin"
-                  : "password"
-              }, app lock will be disabled if no other security method is enabled.`,
+              SettingsService.getProperty("applockKeyboardType") === "numeric"
+                ? strings.removeAppLockPinDesc()
+                : strings.removeAppLockPasswordDesc(),
             hidden: () => {
               return !SettingsService.getProperty("appLockHasPasswordSecurity");
             },
@@ -999,8 +955,8 @@ export const settingsGroups: SettingSection[] = [
           },
           {
             id: "app-lock-fingerprint",
-            name: "Unlock with biometrics",
-            description: "Allow biometric authentication to unlock the app",
+            name: strings.unlockWithBiometrics(),
+            description: strings.unlockWithBiometricsDesc(),
             type: "switch",
             property: "biometricsAuthEnabled",
             onVerify: async () => {
@@ -1013,7 +969,7 @@ export const settingsGroups: SettingSection[] = [
                 ) {
                   SettingsService.setProperty("appLockEnabled", false);
                   ToastManager.show({
-                    heading: "App lock disabled",
+                    heading: strings.appLockDisabled(),
                     type: "success"
                   });
                 }
@@ -1029,19 +985,19 @@ export const settingsGroups: SettingSection[] = [
   },
   {
     id: "back-restore",
-    name: "Backup and restore",
+    name: strings.backupRestore(),
     sections: [
       {
         id: "backups",
         type: "screen",
-        name: "Backups",
+        name: strings.backups(),
         icon: "backup-restore",
-        description: "Create a backup or change backup settings",
+        description: strings.backupsDesc(),
         sections: [
           {
             id: "backup-now",
-            name: "Backup now",
-            description: "Create a backup of your data",
+            name: strings.backupNow(),
+            description: strings.backupNowDesc(),
             modifer: async () => {
               const user = useUserStore.getState().user;
               if (!user || SettingsService.getProperty("encryptedBackup")) {
@@ -1055,15 +1011,14 @@ export const settingsGroups: SettingSection[] = [
           {
             id: "auto-backups",
             type: "component",
-            name: "Automatic backups",
-            description:
-              "Backup your data once every week or daily automatically.",
+            name: strings.automaticBackups(),
+            description: strings.automaticBackupsDesc(),
             component: "autobackups"
           },
           {
             id: "select-backup-dir",
-            name: "Select backup directory",
-            description: "Select directory to store backups",
+            name: strings.selectBackupDir(),
+            description: strings.selectBackupDirDesc(),
             icon: "folder",
             hidden: () =>
               !!SettingsService.get().backupDirectoryAndroid ||
@@ -1078,7 +1033,7 @@ export const settingsGroups: SettingSection[] = [
               } finally {
                 if (!dir) {
                   ToastManager.show({
-                    heading: "No directory selected",
+                    heading: strings.noDirectorySelected(),
                     type: "error"
                   });
                 }
@@ -1087,7 +1042,7 @@ export const settingsGroups: SettingSection[] = [
           },
           {
             id: "change-backup-dir",
-            name: "Change backup directory",
+            name: strings.changeBackupDir(),
             description: () =>
               SettingsService.get().backupDirectoryAndroid?.name || "",
             icon: "folder",
@@ -1104,7 +1059,7 @@ export const settingsGroups: SettingSection[] = [
               } finally {
                 if (!dir) {
                   ToastManager.show({
-                    heading: "No directory selected",
+                    heading: strings.noDirectorySelected(),
                     type: "error"
                   });
                 }
@@ -1114,8 +1069,8 @@ export const settingsGroups: SettingSection[] = [
           {
             id: "enable-backup-encryption",
             type: "switch",
-            name: "Backup encryption",
-            description: "Encrypt all your backups.",
+            name: strings.backupEncryption(),
+            description: strings.backupEncryptionDesc(),
             icon: "lock",
             property: "encryptedBackup",
             modifer: async () => {
@@ -1123,12 +1078,8 @@ export const settingsGroups: SettingSection[] = [
               const settings = SettingsService.get();
               if (!user) {
                 ToastManager.show({
-                  heading: "Login required to enable encryption",
-                  type: "error",
-                  func: () => {
-                    eSendEvent(eOpenLoginDialog);
-                  },
-                  actionText: "Login"
+                  heading: strings.loginRequired(),
+                  type: "error"
                 });
                 return;
               }
@@ -1149,18 +1100,17 @@ export const settingsGroups: SettingSection[] = [
       },
       {
         id: "restore-backup",
-        name: "Restore backup",
-        description: "Restore backup from phone storage.",
+        name: strings.restoreBackup(),
+        description: strings.restoreBackupDesc(),
         modifer: () => {
           eSendEvent(eOpenRestoreDialog);
         }
       },
       {
         id: "export-notes",
-        name: "Export all notes",
+        name: strings.exportAllNotes(),
         icon: "export",
-        description:
-          "Export all notes as pdf, markdown, html or text in a single zip file",
+        description: strings.exportAllNotesDesc(),
         modifer: () => {
           verifyUser(null, () => {
             ExportNotesSheet.present(undefined, true);
@@ -1171,14 +1121,13 @@ export const settingsGroups: SettingSection[] = [
   },
   {
     id: "productivity",
-    name: "Productivity",
+    name: strings.productivity(),
     sections: [
       {
         id: "notification-notes",
         type: "switch",
-        name: "Notes in notifications",
-        description:
-          "Add quick notes from notifications without opening the app.",
+        name: strings.quickNoteNotification(),
+        description: strings.quickNoteNotificationDesc(),
         property: "notifNotes",
         icon: "form-textbox",
         modifer: () => {
@@ -1197,15 +1146,15 @@ export const settingsGroups: SettingSection[] = [
       {
         id: "reminders",
         type: "screen",
-        name: "Reminders",
+        name: strings.reminders(),
         icon: "bell",
-        description: "Manage and configure reminders in app",
+        description: strings.remindersDesc(),
         sections: [
           {
             id: "enable-reminders",
             property: "reminderNotifications",
             type: "switch",
-            name: "Reminder notifications",
+            name: strings.reminderNotification(),
             icon: "bell-outline",
             onChange: (property) => {
               if (property) {
@@ -1214,20 +1163,18 @@ export const settingsGroups: SettingSection[] = [
                 Notifications.clearAllTriggers();
               }
             },
-            description:
-              "Controls whether this device should receive reminder notifications."
+            description: strings.reminderNotificationDesc()
           },
           {
             id: "snooze-time",
             property: "defaultSnoozeTime",
             type: "input",
-            name: "Default snooze time",
-            description:
-              "Set the default time to snooze a reminder to when you press the snooze button on a notification.",
+            name: strings.defaultSnoozeTime(),
+            description: strings.defaultSnoozeTimeDesc(),
             inputProperties: {
               keyboardType: "decimal-pad",
               defaultValue: 5 + "",
-              placeholder: "Set snooze time in minutes",
+              placeholder: strings.setSnoozeTimePlaceholder(),
               onSubmitEditing: () => {
                 Notifications.setupReminders();
               }
@@ -1236,9 +1183,8 @@ export const settingsGroups: SettingSection[] = [
           {
             id: "reminder-sound-ios",
             type: "screen",
-            name: "Change notification sound",
-            description:
-              "Set the notification sound for reminder notifications",
+            name: strings.changeNotificationSound(),
+            description: strings.changeNotificationSoundDesc(),
             component: "sound-picker",
             icon: "bell-ring",
             hidden: () =>
@@ -1247,9 +1193,8 @@ export const settingsGroups: SettingSection[] = [
           },
           {
             id: "reminder-sound-android",
-            name: "Change notification sound",
-            description:
-              "Set the notification sound for reminder notifications",
+            name: strings.changeNotificationSound(),
+            description: strings.changeNotificationSoundDesc(),
             icon: "bell-ring",
             hidden: () =>
               Platform.OS === "ios" ||
@@ -1267,7 +1212,7 @@ export const settingsGroups: SettingSection[] = [
   },
   {
     id: "help-support",
-    name: "Help and support",
+    name: strings.helpAndSupport(),
     sections: [
       {
         id: "report-issue",
@@ -1279,41 +1224,38 @@ export const settingsGroups: SettingSection[] = [
             component: <Issue />
           });
         },
-        description:
-          "Faced an issue or have a suggestion? Click here to create a bug report"
+        description: strings.reportAnIssueDesc()
       },
       {
         id: "email-support",
-        name: "Email support",
+        name: strings.emailSupport(),
         icon: "mail",
         modifer: () => {
           Linking.openURL("mailto:support@streetwriters.co");
         },
-        description:
-          "Reach out to us via email and let us resolve your issue directly."
+        description: strings.emailSupportDesc()
       },
       {
         id: "docs-link",
-        name: "Documentation",
+        name: strings.documentation(),
         modifer: async () => {
           Linking.openURL("https://docs.notesnook.com");
         },
-        description: "Learn about every feature and how it works.",
+        description: strings.documentationDesc(),
         icon: "file-document"
       },
       {
         id: "debugging",
-        name: "Debugging",
-        description:
-          "Get helpful debug info about the app to help us find bugs.",
+        name: strings.debugging(),
+        description: strings.debuggingDesc(),
         type: "screen",
         icon: "bug",
         sections: [
           {
             id: "debug-logs",
             type: "screen",
-            name: "Debug logs",
-            description: "View debug logs from the app",
+            name: strings.debugLogs(),
+            description: strings.debugLogsDesc(),
             component: "debug-logs"
           }
         ]
@@ -1322,20 +1264,20 @@ export const settingsGroups: SettingSection[] = [
   },
   {
     id: "community",
-    name: "community",
+    name: strings.community(),
     sections: [
       {
         id: "join-telegram",
-        name: "Join our Telegram group",
-        description: "We are on telegram, let's talk",
+        name: strings.joinTelegram(),
+        description: strings.joinTelegramDesc(),
         modifer: () => {
           Linking.openURL("https://t.me/notesnook").catch(console.log);
         }
       },
       {
         id: "join-mastodom",
-        name: "Follow us on Mastodon",
-        description: "We are on mastodom",
+        name: strings.joinMastodon(),
+        description: strings.joinMastodonDesc(),
         icon: "mastodon",
         modifer: () => {
           Linking.openURL("https://fosstodon.org/@notesnook").catch(
@@ -1345,8 +1287,8 @@ export const settingsGroups: SettingSection[] = [
       },
       {
         id: "join-twitter",
-        name: "Follow us on twitter",
-        description: "Stay updated with the latest news about Notesnook",
+        name: strings.followOnX(),
+        description: strings.followOnXDesc(),
         icon: "twitter",
         modifer: () => {
           Linking.openURL("https://twitter.com/notesnook").catch(console.log);
@@ -1354,36 +1296,12 @@ export const settingsGroups: SettingSection[] = [
       },
       {
         id: "join-discord",
-        name: "Join our Discord community",
+        name: strings.joinDiscord(),
         icon: "discord",
         modifer: async () => {
-          presentSheet({
-            title: "Join our Discord Community",
-            iconColor: "discord",
-            paragraph:
-              "We are not ghosts, chat with us and share your experience.",
-            valueArray: [
-              "Talk with us anytime.",
-              "Follow the development process",
-              "Give suggestions and report issues.",
-              "Get early access to new features",
-              "Meet other people using Notesnook"
-            ],
-            icon: "discord",
-            action: async () => {
-              try {
-                Linking.openURL("https://discord.gg/zQBK97EE22").catch(
-                  console.log
-                );
-              } catch (e) {
-                console.error(e);
-              }
-            },
-            actionText: "Join Now"
-          });
+          Linking.openURL("https://discord.gg/zQBK97EE22").catch(console.log);
         },
-        description:
-          "We are not ghosts, chat with us and share your experience."
+        description: strings.joinDiscordDesc()
       }
     ]
   },
@@ -1393,7 +1311,7 @@ export const settingsGroups: SettingSection[] = [
     sections: [
       {
         id: "tos",
-        name: "Terms of service",
+        name: strings.tos(),
         modifer: async () => {
           try {
             await Linking.openURL("https://notesnook.com/tos");
@@ -1401,11 +1319,11 @@ export const settingsGroups: SettingSection[] = [
             console.error(e);
           }
         },
-        description: "Read our terms of service"
+        description: strings.tosDesc()
       },
       {
         id: "privacy-policy",
-        name: "Privacy policy",
+        name: strings.privacyPolicy(),
         modifer: async () => {
           try {
             await Linking.openURL("https://notesnook.com/privacy");
@@ -1413,25 +1331,25 @@ export const settingsGroups: SettingSection[] = [
             console.error(e);
           }
         },
-        description: "Read our privacy policy"
+        description: strings.privacyPolicyDesc()
       },
       {
         id: "licenses",
-        name: "Open source Licenses",
+        name: strings.licenses(),
         type: "screen",
         component: "licenses",
-        description: "Open source libraries used in Notesnook",
+        description: strings.ossLibs(),
         icon: "open-source-initiative"
       }
     ]
   },
   {
     id: "about",
-    name: "about",
+    name: strings.about(),
     sections: [
       {
         id: "download",
-        name: "Download on desktop",
+        name: strings.downloadOnDesktop(),
         icon: "monitor",
         modifer: async () => {
           try {
@@ -1440,11 +1358,11 @@ export const settingsGroups: SettingSection[] = [
             console.error(e);
           }
         },
-        description: "Get Notesnook app on your desktop and access all notes"
+        description: strings.downloadOnDesktopDesc()
       },
       {
         id: "roadmap",
-        name: "Roadmap",
+        name: strings.roadmap(),
         icon: "chart-timeline",
         modifer: async () => {
           try {
@@ -1453,13 +1371,13 @@ export const settingsGroups: SettingSection[] = [
             console.error(e);
           }
         },
-        description: "See what the future of Notesnook is going to be like."
+        description: strings.roadmapDesc()
       },
       {
         id: "check-for-updates",
-        name: "Check for updates",
+        name: strings.checkForUpdates(),
         icon: "cellphone-arrow-down",
-        description: "Check for new version of Notesnook",
+        description: strings.checkForUpdatesDesc(),
         modifer: async () => {
           presentSheet({
             //@ts-ignore // Migrate to ts
@@ -1469,7 +1387,7 @@ export const settingsGroups: SettingSection[] = [
       },
       {
         id: "app-version",
-        name: "App version",
+        name: strings.appVersion(),
         icon: "alpha-v",
         modifer: async () => {
           try {

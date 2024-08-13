@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "fonteditor-core": "^2.1.11",
+    "listr": "^0.14.3",
     "otplib": "12.0.1",
     "patch-package": "7.0.0",
     "react-refresh": "0.14.0"
@@ -34,10 +35,10 @@
     "@notesnook/core": "file:../../packages/core",
     "@notesnook/editor": "file:../../packages/editor",
     "@notesnook/editor-mobile": "file:../../packages/editor-mobile",
+    "@notesnook/intl": "file:../../packages/intl",
     "@notesnook/logger": "file:../../packages/logger",
     "@notesnook/theme": "file:../../packages/theme",
     "@notesnook/themes-server": "file:../../servers/themes",
-    "@notesnook/intl": "file:../../packages/intl",
     "diffblazer": "^1.0.1",
     "react": "18.2.0",
     "react-native": "0.72.0"

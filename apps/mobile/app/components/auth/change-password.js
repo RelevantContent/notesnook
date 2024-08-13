@@ -116,7 +116,7 @@ export const ChangePassword = () => {
         autoComplete="password"
         autoCapitalize="none"
         autoCorrect={false}
-        placeholder="Old Password"
+        placeholder={strings.oldPassword()}
       />
 
       <Input
@@ -125,14 +125,14 @@ export const ChangePassword = () => {
           password.current = value;
         }}
         onErrorCheck={(e) => setError(e)}
-        returnKeyLabel="Next"
+        returnKeyLabel={strings.next()}
         returnKeyType="next"
         secureTextEntry
         validationType="password"
         autoComplete="password"
         autoCapitalize="none"
         autoCorrect={false}
-        placeholder="New password"
+        placeholder={strings.newPassword()}
       />
 
       <Notice text={strings.changePasswordNotice()} type="alert" />

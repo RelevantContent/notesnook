@@ -31,6 +31,7 @@ import { eCloseSheet } from "../utils/events";
 import { sleep } from "../utils/time";
 import { ToastManager, eSendEvent, presentSheet } from "./event-manager";
 import SettingsService from "./settings";
+import { strings } from "@notesnook/intl";
 
 const MS_DAY = 86400000;
 const MS_WEEK = MS_DAY * 7;
@@ -82,16 +83,15 @@ async function checkBackupDirExists(reset = false, context = "global") {
         return;
       }
       presentDialog({
-        title: "Select backup folder",
-        paragraph:
-          "Please select a folder where you would like to store backup files.",
+        title: strings.selectBackupDir(),
+        paragraph: strings.selectBackupDirDesc(),
         positivePress: async () => {
           resolve(await getDirectoryAndroid());
         },
         onClose: () => {
           resolve(null);
         },
-        positiveText: "Select",
+        positiveText: strings.select(),
         context: context
       });
     });
@@ -102,14 +102,10 @@ async function checkBackupDirExists(reset = false, context = "global") {
 
 async function presentBackupCompleteSheet(backupFilePath) {
   presentSheet({
-    title: "Backup complete",
+    title: strings.backupComplete(),
     icon: "cloud-upload",
-    paragraph: `${
-      Platform.OS === "android"
-        ? 'Backup file saved in "Notesnook backups" folder on your phone'
-        : "Backup file is saved in File Manager/Notesnook folder"
-    }. Share your backup to your cloud so you do not lose it.`,
-    actionText: "Share backup",
+    paragraph: strings.backupSaved(Platform.OS),
+    actionText: strings.shareBackup(),
     actionsArray: [
       {
         action: () => {
@@ -126,7 +122,7 @@ async function presentBackupCompleteSheet(backupFilePath) {
             }).catch(console.log);
           }
         },
-        actionText: "Share"
+        actionText: strings.share()
       },
       {
         action: async () => {
@@ -135,7 +131,7 @@ async function presentBackupCompleteSheet(backupFilePath) {
             showBackupCompleteSheet: false
           });
         },
-        actionText: "Never ask again",
+        actionText: strings.neverAskAgain(),
         type: "secondary"
       }
     ]
@@ -163,9 +159,8 @@ async function run(progress = false, context) {
 
   if (progress) {
     presentSheet({
-      title: "Backing up your data",
-      paragraph:
-        "All your backups are stored in 'Phone Storage/Notesnook/backups/' folder",
+      title: strings.backingUpData(),
+      paragraph: strings.backupDataDesc(),
       progress: true
     });
   }
@@ -242,8 +237,7 @@ async function run(progress = false, context) {
     }
 
     ToastManager.show({
-      heading: "Backup successful",
-      message: "Your backup is stored in Notesnook folder on your phone.",
+      heading: strings.backupSuccess(),
       type: "success",
       context: "global"
     });
@@ -252,7 +246,7 @@ async function run(progress = false, context) {
       path: path
     };
   } catch (e) {
-    ToastManager.error(e, "Backup failed", context || "global");
+    ToastManager.error(e, strings.backupFailed(), context || "global");
 
     if (e?.message?.includes("android.net.Uri") && androidBackupDirectory) {
       SettingsService.setProperty("backupDirectoryAndroid", null);

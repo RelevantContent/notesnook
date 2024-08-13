@@ -261,7 +261,7 @@ export const AttachmentDialog = ({ note }: { note?: Note }) => {
 
       <Seperator />
       <Input
-        placeholder="Filter attachments by filename, type or hash"
+        placeholder={strings.filterAttachments()}
         onChangeText={onChangeText}
         onSubmit={() => {
           onChangeText(attachmentSearchValue.current as string);
