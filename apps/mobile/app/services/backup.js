@@ -153,7 +153,7 @@ async function run(progress = false, context) {
   let androidBackupDirectory = await checkBackupDirExists(false, context);
   if (!androidBackupDirectory)
     return {
-      error: new Error("Backup directory not selected"),
+      error: new Error(strings.backupDirectoryNotSelected()),
       report: false
     };
 

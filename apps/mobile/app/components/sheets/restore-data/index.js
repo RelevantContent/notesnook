@@ -298,7 +298,8 @@ const RestoreDataComponent = ({ close, setRestoring, restoring }) => {
             } else {
               password = value;
             }
-            if (!password && !key) throw new Error("Failed to decrypt backup");
+            if (!password && !key)
+              throw new Error(strings.failedToDecryptBackup());
           }
           await db.backup.import(parsed, password, key);
           console.log("Imported", path);

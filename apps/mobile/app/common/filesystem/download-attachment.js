@@ -115,7 +115,7 @@ export async function downloadAttachments(
         RNFetchBlob.fs.unlink(zipSourceFolder).catch(console.log);
         return;
       }
-      if (!uri) throw new Error("Failed to download file");
+      if (!uri) throw new Error(strings.failedToDownloadFile());
       // Move file to the source folder we will zip eventually and rename the file to it's actual name.
       const filePath = `${zipSourceFolder}/${attachment.filename}`;
       await RNFetchBlob.fs.mv(`${cacheDir}/${uri}`, filePath);

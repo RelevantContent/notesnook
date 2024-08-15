@@ -28,6 +28,7 @@ import filesystem from "../filesystem";
 import Storage from "./storage";
 import { RNSqliteDriver } from "./sqlite.kysely";
 import { getDatabaseKey } from "./encryption";
+import { strings } from "@notesnook/intl";
 
 database.host(
   __DEV__
@@ -54,8 +55,7 @@ database.host(
 
 export async function setupDatabase(password) {
   const key = await getDatabaseKey(password);
-  if (!key)
-    throw new Error("Database setup failed, could not get database key");
+  if (!key) throw new Error(strings.databaseSetupFailed());
 
   console.log("Opening database with key:", !!key);
 

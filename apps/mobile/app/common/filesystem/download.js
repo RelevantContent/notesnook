@@ -53,7 +53,7 @@ export async function downloadFile(filename, data, cancelToken) {
       DatabaseLogger.log(
         `Error downloading file: ${filename}, ${res.status}, ${res.statusText}, reason: Unable to resolve download url`
       );
-      throw new Error(`${res.status}: Unable to resolve download url`);
+      throw new Error(`${res.status}: ${strings.unableToResolveDownloadUrl()}`);
     }
 
     const downloadUrl = await res.text();
@@ -62,7 +62,7 @@ export async function downloadFile(filename, data, cancelToken) {
       DatabaseLogger.log(
         `Error downloading file: ${filename}, reason: Unable to resolve download url`
       );
-      throw new Error("Unable to resolve download url");
+      throw new Error(strings.unableToResolveDownloadUrl());
     }
     let totalSize = 0;
     DatabaseLogger.log(`Download starting: ${filename}`);
